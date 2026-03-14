@@ -4,7 +4,7 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "={{ $json.message.text }}",
+        "text": "={{ $json.message?.text || $json.body?.text }}",
         "options": {
           "systemMessage": "=# ROL\nEres un asistente especializado en viajes llamado Fenómeno. \nTu única fuente de información son las guías de viaje almacenadas \nen la base de datos vectorial de Pinecone.\n\n# COMPORTAMIENTO\n- Consulta SIEMPRE la base de datos vectorial antes de responder.\n- Responde ÚNICAMENTE con información que hayas recuperado de Pinecone.\n- Si la información no está en la base de datos, responde exactamente: \n  \"No tengo información sobre ese destino o tema en mis guías de viaje.\"\n- NUNCA inventes datos, precios, fechas, horarios ni recomendaciones \n  que no estén en los documentos recuperados.\n- NUNCA uses tu conocimiento general para complementar respuestas.\n\n# FORMATO DE RESPUESTA\n- Sé claro, ordenado y amigable.\n- Si encuentras información relevante, cítala de forma estructurada.\n- Indica siempre de qué guía o fuente proviene la información \n  (si está disponible en los metadatos).\n- Si la consulta es ambigua, pide aclaración antes de buscar.\n\n# LIMITACIONES\n- Solo respondes preguntas relacionadas con viajes y turismo.\n- Si te preguntan algo fuera de ese ámbito, redirige amablemente \n  al usuario hacia temas de viaje.\n\n# CONTEXTO RECUPERADO\nUsa el siguiente contexto obtenido de Pinecone para responder:\n{{ $json.message.text }}\n\n# PREGUNTA DEL USUARIO\n{{ $json.message.text }}"
         }
@@ -12,8 +12,8 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
       "position": [
-        0,
-        0
+        -464,
+        -176
       ],
       "id": "1880dfd7-9091-4f27-a15f-4bc0d258cc48",
       "name": "AI Agent"
@@ -25,8 +25,8 @@
       "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
       "typeVersion": 1,
       "position": [
-        96,
-        544
+        -280,
+        480
       ],
       "id": "c70a3a27-9e87-4234-8d98-8a7fdb6825b1",
       "name": "Embeddings Ollama  Nomic-embed-text 1.5",
@@ -51,8 +51,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        -80,
-        256
+        -512,
+        64
       ],
       "id": "498ec248-b487-424c-b424-387f5a7e54e0",
       "name": "Anthropic API",
@@ -76,8 +76,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        496,
-        320
+        -72,
+        272
       ],
       "id": "a4007136-7e16-4661-a16c-42f30184bbff",
       "name": "Vector Store Tool",
@@ -101,8 +101,8 @@
       "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
       "typeVersion": 1.3,
       "position": [
-        176,
-        384
+        -360,
+        272
       ],
       "id": "263b4a7f-9822-4dc4-80ce-df3812994377",
       "name": "Pinecone Vector DB",
@@ -115,37 +115,203 @@
     },
     {
       "parameters": {
-        "description": "utiliza esta herramienta para obtener información sobre los contratos de arrendamiento que te pregunten"
+        "description": "utiliza esta herramienta para obtener información sobre los viajes de la base de datos vectoria"
       },
       "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
       "typeVersion": 1.1,
       "position": [
-        224,
-        160
+        -256,
+        64
       ],
       "id": "9d2f1679-7e9b-4908-a4a5-8e4a78ca9aad",
       "name": "Answer Module"
     },
     {
       "parameters": {
-        "updates": [
-          "message"
-        ],
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Set WebHook').item.json.message.chat.id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -384,
+        64
+      ],
+      "id": "a2f7ec6a-d0e1-44db-a267-9111a7fa4870",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('ChatID whiteListed?').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
         "additionalFields": {}
       },
-      "type": "n8n-nodes-base.telegramTrigger",
+      "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        -784,
-        224
+        360,
+        -256
       ],
-      "id": "3f820c24-d913-4dee-9fa0-065e0096feb6",
-      "name": "Telegram Trigger",
-      "webhookId": "d8bfb4ac-e790-473a-98e2-6ca810787e0d",
+      "id": "94c7c247-e9cc-4bda-acaf-03f089b88bf5",
+      "name": "Respond Back",
+      "webhookId": "dfa4ea70-336e-4549-b58d-5743773afaa4",
       "credentials": {
         "telegramApi": {
           "id": "lXkA7ZLezD3lsUGa",
           "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "452bf787-fa05-4de9-8f6d-9f3739763759",
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "#fenomeno",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Text Message"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "e98b28b9-d6d1-4335-992e-518c03d7bfc5",
+                    "leftValue": "={{ Object.keys($json.message).includes('voice') }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Audio Message"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -1632,
+        -160
+      ],
+      "id": "29a3725e-f265-4d41-b996-de7817c92ce4",
+      "name": "Input Format"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.voice.file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -1408,
+        -88
+      ],
+      "id": "d3a81448-35ce-4128-9993-8d501e8f295f",
+      "name": "Get Audio FileID",
+      "webhookId": "f31c8d5c-b762-4f68-89f9-e9c47d2c401f",
+      "notesInFlow": true,
+      "credentials": {
+        "telegramApi": {
+          "id": "lXkA7ZLezD3lsUGa",
+          "name": "Telegram account"
+        }
+      },
+      "notes": "apiTelegram -> /getFile?file_id=<FILE_ID>"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const binaryKey = Object.keys($input.item.binary)[0];\n$input.item.binary['audio'] = {\n  ...$input.item.binary[binaryKey],\n  fileName: 'audio.ogg',\n  fileExtension: 'ogg',\n  mimeType: 'audio/ogg'\n};\ndelete $input.item.binary[binaryKey];\nreturn $input.item;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1184,
+        -88
+      ],
+      "id": "dbc1f8b4-8039-4c2f-9d42-b0beeab205c0",
+      "name": "Rename Audio Binary"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/audio/transcriptions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "whisper-large-v3"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "=audio"
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {}
+          },
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -960,
+        -88
+      ],
+      "id": "2973b47c-55aa-45c0-9a6e-a5c769c16aef",
+      "name": "HTTP POST Grok Binary Transcription",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "0TpXpD9PKArZPmct",
+          "name": "Bearer Auth account"
         }
       }
     },
@@ -167,11 +333,35 @@
                 "type": "string",
                 "operation": "equals"
               }
-            },
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1856,
+        -160
+      ],
+      "id": "dde2217f-7a5c-4855-9e89-4814083ae81e",
+      "name": "ChatID whiteListed?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
             {
-              "id": "1fd39d5f-014a-486a-a9ad-537894ab21ad",
-              "leftValue": "={{ $json.message.text }}",
-              "rightValue": "#fenomeno",
+              "id": "43e9c105-5792-45eb-bae1-16e412440fbc",
+              "leftValue": "={{ $json.body.text.toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[¡!¿?,.:]/g, '').trim()}}",
+              "rightValue": "fenomeno",
               "operator": {
                 "type": "string",
                 "operation": "startsWith"
@@ -185,41 +375,163 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        -448,
-        96
+        -736,
+        -88
       ],
-      "id": "dde2217f-7a5c-4855-9e89-4814083ae81e",
-      "name": "Message Meets Criteria"
+      "id": "adcf147d-f547-405a-95c5-30e24704f82d",
+      "name": "Meets Criteria"
     },
     {
       "parameters": {
-        "sessionIdType": "customKey",
-        "sessionKey": "={{ $json.message.from.id }}"
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Telegram Set WebHook').item.json.message.voice }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notExists",
+                      "singleValue": true
+                    },
+                    "id": "a89dfd92-29e9-4e82-8fa0-bab76d32ff53"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "text"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "c8169e99-9caa-4e41-ae85-2d237e9e7f8c",
+                    "leftValue": "={{ $('Telegram Set WebHook').item.json.message.voice }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "eleven labs voice"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
       },
-      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
-      "typeVersion": 1.3,
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
       "position": [
-        64,
-        240
+        136,
+        -160
       ],
-      "id": "a2f7ec6a-d0e1-44db-a267-9111a7fa4870",
-      "name": "Simple Memory"
+      "id": "49c6d8f0-4bb7-4a81-b7cc-172fb3239f4c",
+      "name": "OutPut Type"
     },
     {
       "parameters": {
-        "chatId": "={{ $('Message Meets Criteria').item.json.message.chat.id }}",
-        "text": "={{ $json.output }}",
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -2080,
+        -160
+      ],
+      "id": "3f820c24-d913-4dee-9fa0-065e0096feb6",
+      "name": "Telegram Set WebHook",
+      "webhookId": "d8bfb4ac-e790-473a-98e2-6ca810787e0d",
+      "notesInFlow": true,
+      "credentials": {
+        "telegramApi": {
+          "id": "lXkA7ZLezD3lsUGa",
+          "name": "Telegram account"
+        }
+      },
+      "notes": "api.telegram -> setWebhook?url=<WEBHOOK_URL>"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.elevenlabs.io/v1/text-to-speech/eI75MoFj26Nq5Itn4pll",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "={{ $json.output }}"
+            },
+            {
+              "name": "model_id",
+              "value": "eleven_multilingual_v2"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        360,
+        -64
+      ],
+      "id": "4a11c3a5-18ca-4cb3-9ec6-2737e022b071",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "j4tDkQLxliDfjLH5",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAudio",
+        "chatId": "={{ $('ChatID whiteListed?').item.json.message.chat.id }}",
+        "binaryData": true,
         "additionalFields": {}
       },
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        640,
-        0
+        584,
+        -64
       ],
-      "id": "94c7c247-e9cc-4bda-acaf-03f089b88bf5",
-      "name": "Respond Back",
-      "webhookId": "dfa4ea70-336e-4549-b58d-5743773afaa4",
+      "id": "f5165671-e976-4d0e-92cf-82468f7c862c",
+      "name": "Send an audio file",
+      "webhookId": "69dc5bf0-d545-445f-b02c-f5ddfa83e354",
       "credentials": {
         "telegramApi": {
           "id": "lXkA7ZLezD3lsUGa",
@@ -285,28 +597,6 @@
         ]
       ]
     },
-    "Telegram Trigger": {
-      "main": [
-        [
-          {
-            "node": "Message Meets Criteria",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Message Meets Criteria": {
-      "main": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Simple Memory": {
       "ai_memory": [
         [
@@ -322,7 +612,120 @@
       "main": [
         [
           {
+            "node": "OutPut Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Input Format": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Audio FileID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Audio FileID": {
+      "main": [
+        [
+          {
+            "node": "Rename Audio Binary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rename Audio Binary": {
+      "main": [
+        [
+          {
+            "node": "HTTP POST Grok Binary Transcription",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP POST Grok Binary Transcription": {
+      "main": [
+        [
+          {
+            "node": "Meets Criteria",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ChatID whiteListed?": {
+      "main": [
+        [
+          {
+            "node": "Input Format",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Meets Criteria": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OutPut Type": {
+      "main": [
+        [
+          {
             "node": "Respond Back",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Set WebHook": {
+      "main": [
+        [
+          {
+            "node": "ChatID whiteListed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Send an audio file",
             "type": "main",
             "index": 0
           }
@@ -336,7 +739,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "9f59ff9a-2e6a-472e-b193-893b255516f6",
+  "versionId": "e63d6bfd-204a-496e-bda3-5a7bae032d69",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "c2bc6d4addc67d0a1ef9fd8c38c7736a8abc39a39447038f494b588f2a44bc1a"
