@@ -2,35 +2,12 @@
 
 A conversational agent specialized in travel, built with **n8n**, deployed locally via **Docker**, that replies in a Telegram group using **RAG** over a **Pinecone** vector database. Using Reverse Tunelling on local from ngrok
 ---
+## 🏗️ Architecture
 
 ![Texto alternativo](adding_eleven_labs_voice.png)
 
 ---
 
-## 🏗️ Architecture
-
-```
-User (Telegram)
-    │
-    ▼
-Telegram Trigger (Webhook)
-    │
-    ▼
-IF (Filter: chat_id + message starts with #fenomeno)
-    │
-    ▼
-AI Agent (Claude / Anthropic API)
-    ├── 🧠 Memory (Simple Memory by chat.id)
-    ├── 🔍 Vector Store Tool
-    │       └── Pinecone Vector DB
-    │               └── Embeddings (Ollama nomic-embed-text)
-    └── 📚 Answer Module
-    │
-    ▼
-Telegram — Send Text Message
-```
-
----
 
 ## 🛠️ Stack
 
