@@ -3,7 +3,7 @@
 A conversational agent specialized in travel, built with **n8n**, deployed locally via **Docker**, that replies in a Telegram group using **RAG** over a **Pinecone** vector database. Using Reverse Tunelling on local from ngrok
 ---
 
-![Texto alternativo](n8n_textbasicflow.png)
+![Texto alternativo](adding eleven labs voice.png)
 
 ---
 
