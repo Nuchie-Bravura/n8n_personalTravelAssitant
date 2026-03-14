@@ -1,6 +1,10 @@
-# 🤖 Fenómeno — Telegram Travel AI Agent
+# 🤖  Telegram Travel AI Agent
 
-A conversational agent specialized in travel, built with **n8n**, deployed locally via **Docker**, that replies in a Telegram group using **RAG** over a **Pinecone** vector database.
+A conversational agent specialized in travel, built with **n8n**, deployed locally via **Docker**, that replies in a Telegram group using **RAG** over a **Pinecone** vector database. Using Reverse Tunelling on local from ngrok
+---
+
+
+
 
 ---
 
@@ -54,14 +58,14 @@ Telegram — Send Text Message
 The agent only responds when **both conditions** are met:
 
 1. The `chat.id` matches the authorized group
-2. The message starts with `#fenomeno`
+2. The message starts with `#keyword`
 
 ---
 
 ## 🔒 Security
 
 - Filtering by `chat.id` to prevent unauthorized use
-- The bot only responds to messages prefixed with `#fenomeno`
+- The bot only responds to messages prefixed with `#keyword`
 - Session memory is scoped by `chat.id` (shared within the group)
 
 ---
