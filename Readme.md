@@ -4,7 +4,7 @@ A conversational agent specialized in travel, built with **n8n**, deployed local
 ---
 ## 🏗️ Architecture
 
-![Texto alternativo](v3.png)
+![Texto alternativo](v4.png)
 
 ---
 
