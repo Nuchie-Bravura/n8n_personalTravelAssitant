@@ -3,30 +3,13 @@
   "nodes": [
     {
       "parameters": {
-        "promptType": "define",
-        "text": "={{ $json.message?.text || $json.body?.text }}",
-        "options": {
-          "systemMessage": "=# ROL\nEres un asistente especializado en viajes llamado Fenómeno. \nTu única fuente de información son las guías de viaje almacenadas \nen la base de datos vectorial de Pinecone.\n\n# COMPORTAMIENTO\n- Consulta SIEMPRE la base de datos vectorial antes de responder.\n- Responde ÚNICAMENTE con información que hayas recuperado de Pinecone.\n- Si la información no está en la base de datos, responde exactamente: \n  \"No tengo información sobre ese destino o tema en mis guías de viaje.\"\n- NUNCA inventes datos, precios, fechas, horarios ni recomendaciones \n  que no estén en los documentos recuperados.\n- NUNCA uses tu conocimiento general para complementar respuestas.\n\n# FORMATO DE RESPUESTA\n- Sé claro, ordenado y amigable.\n- Si encuentras información relevante, cítala de forma estructurada.\n- Indica siempre de qué guía o fuente proviene la información \n  (si está disponible en los metadatos).\n- Si la consulta es ambigua, pide aclaración antes de buscar.\n\n# LIMITACIONES\n- Solo respondes preguntas relacionadas con viajes y turismo.\n- Si te preguntan algo fuera de ese ámbito, redirige amablemente \n  al usuario hacia temas de viaje.\n\n# CONTEXTO RECUPERADO\nUsa el siguiente contexto obtenido de Pinecone para responder:\n{{ $json.message.text }}\n\n# PREGUNTA DEL USUARIO\n{{ $json.message.text }}"
-        }
-      },
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 3.1,
-      "position": [
-        -464,
-        -176
-      ],
-      "id": "1880dfd7-9091-4f27-a15f-4bc0d258cc48",
-      "name": "AI Agent"
-    },
-    {
-      "parameters": {
         "model": "nomic-embed-text:v1.5"
       },
       "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
       "typeVersion": 1,
       "position": [
-        -280,
-        480
+        -560,
+        448
       ],
       "id": "c70a3a27-9e87-4234-8d98-8a7fdb6825b1",
       "name": "Embeddings Ollama  Nomic-embed-text 1.5",
@@ -51,8 +34,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        -512,
-        64
+        -688,
+        48
       ],
       "id": "498ec248-b487-424c-b424-387f5a7e54e0",
       "name": "Anthropic API",
@@ -76,8 +59,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        -72,
-        272
+        -240,
+        224
       ],
       "id": "a4007136-7e16-4661-a16c-42f30184bbff",
       "name": "Vector Store Tool",
@@ -101,8 +84,8 @@
       "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
       "typeVersion": 1.3,
       "position": [
-        -360,
-        272
+        -560,
+        256
       ],
       "id": "263b4a7f-9822-4dc4-80ce-df3812994377",
       "name": "Pinecone Vector DB",
@@ -120,7 +103,7 @@
       "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
       "typeVersion": 1.1,
       "position": [
-        -256,
+        -416,
         64
       ],
       "id": "9d2f1679-7e9b-4908-a4a5-8e4a78ca9aad",
@@ -134,8 +117,8 @@
       "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
       "typeVersion": 1.3,
       "position": [
-        -384,
-        64
+        -560,
+        16
       ],
       "id": "a2f7ec6a-d0e1-44db-a267-9111a7fa4870",
       "name": "Simple Memory"
@@ -144,13 +127,15 @@
       "parameters": {
         "chatId": "={{ $('ChatID whiteListed?').item.json.message.chat.id }}",
         "text": "={{ $json.output }}",
-        "additionalFields": {}
+        "additionalFields": {
+          "appendAttribution": false
+        }
       },
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        360,
-        -256
+        384,
+        -128
       ],
       "id": "94c7c247-e9cc-4bda-acaf-03f089b88bf5",
       "name": "Respond Back",
@@ -223,8 +208,8 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.4,
       "position": [
-        -1632,
-        -160
+        -1680,
+        -176
       ],
       "id": "29a3725e-f265-4d41-b996-de7817c92ce4",
       "name": "Input Format"
@@ -238,8 +223,8 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        -1408,
-        -88
+        -1488,
+        -96
       ],
       "id": "d3a81448-35ce-4128-9993-8d501e8f295f",
       "name": "Get Audio FileID",
@@ -252,20 +237,6 @@
         }
       },
       "notes": "apiTelegram -> /getFile?file_id=<FILE_ID>"
-    },
-    {
-      "parameters": {
-        "mode": "runOnceForEachItem",
-        "jsCode": "const binaryKey = Object.keys($input.item.binary)[0];\n$input.item.binary['audio'] = {\n  ...$input.item.binary[binaryKey],\n  fileName: 'audio.ogg',\n  fileExtension: 'ogg',\n  mimeType: 'audio/ogg'\n};\ndelete $input.item.binary[binaryKey];\nreturn $input.item;"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -1184,
-        -88
-      ],
-      "id": "dbc1f8b4-8039-4c2f-9d42-b0beeab205c0",
-      "name": "Rename Audio Binary"
     },
     {
       "parameters": {
@@ -303,8 +274,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        -960,
-        -88
+        -1072,
+        -96
       ],
       "id": "2973b47c-55aa-45c0-9a6e-a5c769c16aef",
       "name": "HTTP POST Grok Binary Transcription",
@@ -342,7 +313,7 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        -1856,
+        -1952,
         -160
       ],
       "id": "dde2217f-7a5c-4855-9e89-4814083ae81e",
@@ -375,8 +346,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        -736,
-        -88
+        -864,
+        -96
       ],
       "id": "adcf147d-f547-405a-95c5-30e24704f82d",
       "name": "Meets Criteria"
@@ -395,20 +366,20 @@
                 },
                 "conditions": [
                   {
+                    "id": "361a52b5-0a9a-4013-b36b-d9f5749539b8",
                     "leftValue": "={{ $('Telegram Set WebHook').item.json.message.voice }}",
                     "rightValue": "",
                     "operator": {
-                      "type": "string",
-                      "operation": "notExists",
+                      "type": "boolean",
+                      "operation": "exists",
                       "singleValue": true
-                    },
-                    "id": "a89dfd92-29e9-4e82-8fa0-bab76d32ff53"
+                    }
                   }
                 ],
                 "combinator": "and"
               },
               "renameOutput": true,
-              "outputKey": "text"
+              "outputKey": "audio"
             },
             {
               "conditions": {
@@ -420,20 +391,20 @@
                 },
                 "conditions": [
                   {
-                    "id": "c8169e99-9caa-4e41-ae85-2d237e9e7f8c",
-                    "leftValue": "={{ $('Telegram Set WebHook').item.json.message.voice }}",
+                    "id": "bb1dac34-c10f-474c-9fd8-07fb0344d547",
+                    "leftValue": "",
                     "rightValue": "",
                     "operator": {
                       "type": "string",
-                      "operation": "exists",
-                      "singleValue": true
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
                     }
                   }
                 ],
                 "combinator": "and"
               },
               "renameOutput": true,
-              "outputKey": "eleven labs voice"
+              "outputKey": "text"
             }
           ]
         },
@@ -443,8 +414,8 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.4,
       "position": [
-        136,
-        -160
+        96,
+        -32
       ],
       "id": "49c6d8f0-4bb7-4a81-b7cc-172fb3239f4c",
       "name": "OutPut Type"
@@ -459,7 +430,7 @@
       "type": "n8n-nodes-base.telegramTrigger",
       "typeVersion": 1.2,
       "position": [
-        -2080,
+        -2144,
         -160
       ],
       "id": "3f820c24-d913-4dee-9fa0-065e0096feb6",
@@ -476,6 +447,135 @@
     },
     {
       "parameters": {
+        "operation": "sendAudio",
+        "chatId": "={{ $('ChatID whiteListed?').item.json.message.chat.id }}",
+        "binaryData": true,
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        464,
+        128
+      ],
+      "id": "f5165671-e976-4d0e-92cf-82468f7c862c",
+      "name": "Send an audio file",
+      "webhookId": "69dc5bf0-d545-445f-b02c-f5ddfa83e354",
+      "credentials": {
+        "telegramApi": {
+          "id": "lXkA7ZLezD3lsUGa",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const binaryKey = Object.keys($input.item.binary)[0];\n$input.item.binary['audio'] = {\n  ...$input.item.binary[binaryKey],\n  fileName: 'audio.ogg',\n  fileExtension: 'ogg',\n  mimeType: 'audio/ogg'\n};\ndelete $input.item.binary[binaryKey];\nreturn $input.item;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1280,
+        -96
+      ],
+      "id": "dbc1f8b4-8039-4c2f-9d42-b0beeab205c0",
+      "name": "Js script -  Rename Audio Binary"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use this tool to search for images of places, monuments, cities or tourist attractions , Input should be the place or attraction name in English because UnPlash indexes images in english",
+        "url": "https://api.unsplash.com/search/photos",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "=={{ $fromAI('query', 'The place or attraction to search for images, in English') }}"
+            },
+            {
+              "name": "per_page",
+              "value": "1"
+            },
+            {
+              "name": "client_id",
+              "value": "onJKYj_R9QnTibR5Ie9Cbc4ABd2Xyflm6ZORX5KaOiI"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        -512,
+        -384
+      ],
+      "id": "aa034b73-604e-4daa-ad2e-2ed4734cc8d4",
+      "name": "Unplash Images"
+    },
+    {
+      "parameters": {
+        "jsCode": "const output = $input.item.json.output;\nconst imageMatch = output.match(/\\[IMAGE_URL: (https?:\\/\\/[^\\]]+)\\]/);\n\nif (imageMatch) {\n  return {\n    json: {\n      hasImage: true,\n      imageUrl: imageMatch[1],\n      text: output.replace(/\\[IMAGE_URL: [^\\]]+\\]/, '').trim()\n    }\n  };\n}\n\nreturn {\n  json: {\n    hasImage: false,\n    imageUrl: null,\n    text: output\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -256,
+        -192
+      ],
+      "id": "5ea2bc54-0f38-4cdc-ace9-c18ed7e360f7",
+      "name": "js script - check image url"
+    },
+    {
+      "parameters": {
+        "operation": "sendPhoto",
+        "chatId": "={{ $('ChatID whiteListed?').item.json.message.chat.id }}",
+        "file": "={{ $json.imageUrl }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        144,
+        -352
+      ],
+      "id": "8ba09165-6ab8-4adf-878d-6ea04d016736",
+      "name": "Send a photo message",
+      "webhookId": "724fd270-ab0d-49c9-9d65-bbf5187a869f",
+      "credentials": {
+        "telegramApi": {
+          "id": "lXkA7ZLezD3lsUGa",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.result.chat.id }}",
+        "text": "={{ $('Feedback Rules').item.json.text }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        336,
+        -352
+      ],
+      "id": "edbc1b8b-6d83-4f85-bade-ae9765a6beb2",
+      "name": "Send a text message",
+      "webhookId": "b441f2e0-d913-4cf8-8198-2dba931f3ae6",
+      "credentials": {
+        "telegramApi": {
+          "id": "lXkA7ZLezD3lsUGa",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
         "method": "POST",
         "url": "https://api.elevenlabs.io/v1/text-to-speech/eI75MoFj26Nq5Itn4pll",
         "authentication": "genericCredentialType",
@@ -485,7 +585,7 @@
           "parameters": [
             {
               "name": "text",
-              "value": "={{ $json.output }}"
+              "value": "={{ $('Feedback Rules').item.json.text }}"
             },
             {
               "name": "model_id",
@@ -504,11 +604,11 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        360,
-        -64
+        304,
+        128
       ],
       "id": "4a11c3a5-18ca-4cb3-9ec6-2737e022b071",
-      "name": "HTTP Request",
+      "name": "Eleven Labels Text 2 Speech API",
       "credentials": {
         "httpHeaderAuth": {
           "id": "j4tDkQLxliDfjLH5",
@@ -517,27 +617,99 @@
       }
     },
     {
-      "parameters": {
-        "operation": "sendAudio",
-        "chatId": "={{ $('ChatID whiteListed?').item.json.message.chat.id }}",
-        "binaryData": true,
-        "additionalFields": {}
-      },
-      "type": "n8n-nodes-base.telegram",
-      "typeVersion": 1.2,
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryMongoDbChat",
+      "typeVersion": 1,
       "position": [
-        584,
-        -64
+        -2464,
+        480
       ],
-      "id": "f5165671-e976-4d0e-92cf-82468f7c862c",
-      "name": "Send an audio file",
-      "webhookId": "69dc5bf0-d545-445f-b02c-f5ddfa83e354",
-      "credentials": {
-        "telegramApi": {
-          "id": "lXkA7ZLezD3lsUGa",
-          "name": "Telegram account"
+      "id": "4a779468-810a-464a-9ea3-8b7b87634af0",
+      "name": "MongoDB Chat Memory"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.hasImage }}",
+                    "rightValue": "true",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    },
+                    "id": "d05e7da7-b758-42c8-a882-152b3de495e4"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "image will be returned"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "15545191-eba8-4f90-bd0e-3ddd09efcc50",
+                    "leftValue": "",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "text or audio"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -80,
+        -192
+      ],
+      "id": "8049995d-2d2e-41ca-afa5-014fe43e4d98",
+      "name": "Feedback Rules"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message?.text || $json.body?.text }}",
+        "options": {
+          "systemMessage": "=# ROL\nEres un asistente especializado en viajes llamado Fenómeno. \nTu única fuente de información son las guías de viaje almacenadas \nen la base de datos vectorial de Pinecone.\n\n# COMPORTAMIENTO\n- Consulta SIEMPRE la base de datos vectorial antes de responder.\n- Responde ÚNICAMENTE con información que hayas recuperado de Pinecone.\n- Si la información no está en la base de datos, responde exactamente: \n  \"No tengo información sobre ese destino o tema en mis guías de viaje.\"\n- NUNCA inventes datos, precios, fechas, horarios ni recomendaciones \n  que no estén en los documentos recuperados.\n- NUNCA uses tu conocimiento general para complementar respuestas.\n\n# FORMATO DE RESPUESTA\n- Sé claro, ordenado y amigable.\n- Si encuentras información relevante, cítala de forma estructurada.\n- Indica siempre de qué guía o fuente proviene la información \n  (si está disponible en los metadatos).\n- Si la consulta es ambigua, pide aclaración antes de buscar.\n\n# IMÁGENES\n# IMÁGENES\nCuando el usuario use palabras como \"muéstrame\", \"foto\", \"imagen\", \"ver\", \"cómo es\" o pida ver un lugar:\n1. DEBES llamar OBLIGATORIAMENTE a la herramienta search_image\n2. Traduce el nombre del lugar al inglés antes de buscar\n3. Si encuentras imagen devuelve exactamente: [IMAGE_URL: https://...]\n4. Si no encuentras imagen, responde solo con texto\n\n# LIMITACIONES\n- Solo respondes preguntas relacionadas con viajes y turismo.\n- Si te preguntan algo fuera de ese ámbito, redirige amablemente \n  al usuario hacia temas de viaje.\n\n# CONTEXTO RECUPERADO\nUsa la herramienta de búsqueda vectorial para obtener contexto \nrelevante de Pinecone antes de responder.\n\n# PREGUNTA DEL USUARIO\n{{ $json.message?.text || $json.body?.text }}"
         }
-      }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -656,
+        -192
+      ],
+      "id": "1880dfd7-9091-4f27-a15f-4bc0d258cc48",
+      "name": "AI Agent"
     }
   ],
   "pinData": {},
@@ -608,17 +780,6 @@
         ]
       ]
     },
-    "AI Agent": {
-      "main": [
-        [
-          {
-            "node": "OutPut Type",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Input Format": {
       "main": [
         [
@@ -641,18 +802,7 @@
       "main": [
         [
           {
-            "node": "Rename Audio Binary",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Rename Audio Binary": {
-      "main": [
-        [
-          {
-            "node": "HTTP POST Grok Binary Transcription",
+            "node": "Js script -  Rename Audio Binary",
             "type": "main",
             "index": 0
           }
@@ -696,14 +846,14 @@
       "main": [
         [
           {
-            "node": "Respond Back",
+            "node": "Eleven Labels Text 2 Speech API",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "HTTP Request",
+            "node": "Respond Back",
             "type": "main",
             "index": 0
           }
@@ -721,11 +871,84 @@
         ]
       ]
     },
-    "HTTP Request": {
+    "Js script -  Rename Audio Binary": {
+      "main": [
+        [
+          {
+            "node": "HTTP POST Grok Binary Transcription",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Unplash Images": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "js script - check image url": {
+      "main": [
+        [
+          {
+            "node": "Feedback Rules",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a photo message": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Eleven Labels Text 2 Speech API": {
       "main": [
         [
           {
             "node": "Send an audio file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Feedback Rules": {
+      "main": [
+        [
+          {
+            "node": "Send a photo message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "OutPut Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "js script - check image url",
             "type": "main",
             "index": 0
           }
@@ -739,7 +962,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "e63d6bfd-204a-496e-bda3-5a7bae032d69",
+  "versionId": "6e46a180-898d-4a0c-8806-c4a717037f24",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "c2bc6d4addc67d0a1ef9fd8c38c7736a8abc39a39447038f494b588f2a44bc1a"

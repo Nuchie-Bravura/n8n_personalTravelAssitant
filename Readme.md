@@ -4,7 +4,7 @@ A conversational agent specialized in travel, built with **n8n**, deployed local
 ---
 ## 🏗️ Architecture
 
-![Texto alternativo](adding_eleven_labs_voice.png)
+![Texto alternativo](v3.png)
 
 ---
 
@@ -28,6 +28,10 @@ A conversational agent specialized in travel, built with **n8n**, deployed local
 - `TELEGRAM_BOT_TOKEN` — Telegram bot token
 - `ANTHROPIC_API_KEY` — Anthropic API key
 - `PINECONE_API_KEY` — Pinecone API key
+- `GROK_API_KEY` — Grok API key
+- `ELEVENLABS_API_KEY` — Eleven Labs Apikey and Voice ID
+- `MONGO_DB_CONNECTION_STR_` — MongoDB atlas Connection String
+- `UNPLASH_API_KEY` — Unplash
 
 ### Security filters
 
